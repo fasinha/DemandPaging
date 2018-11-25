@@ -7,7 +7,8 @@ public class SinhaProcess
 	private double A; 
 	private double B; 
 	private double C; 
-	int reference; 
+	int referencenum;
+	int word; 
 	int size; 
 	int numOfPages; 
 	int residence;
@@ -15,11 +16,13 @@ public class SinhaProcess
 	SinhaPage currentpage; 
 	int currentpagenum;
 	int faults;
+	int referencechanging;
+	boolean isFault; 
 	
 	ArrayList<SinhaPage> pagetable;
 	private double y;
 	
-	public SinhaProcess(int id, double a, double b, double c, int size, int numOfPages)
+	public SinhaProcess(int id, double a, double b, double c, int size, int numOfPages, int referencenum) throws FileNotFoundException
 	{
 		this.id = id;
 		this.A = a;
@@ -27,12 +30,17 @@ public class SinhaProcess
 		this.C = c;
 		this.size = size;
 		this.numOfPages = numOfPages;
-		this.reference = (111*id + this.size) % this.size;
+		this.referencenum = referencenum;
+		this.word = (111*id + this.size) % this.size;
 		this.residence =0;
 		this.evicted = 0;
-		this.currentpagenum = this.reference / this.size;
+		this.currentpagenum = this.word / this.size;
 		this.pagetable = new ArrayList<SinhaPage>();
-		//this.currentpage = this.reference / this.size;
+		this.currentpage = null;
+		referencechanging = referencenum;
+		this.isFault = false;
+		//nextWordToRef();
+		//this.currentpage = this.word / this.size;
 	}
 	
 	public void fillPageTable()
@@ -42,11 +50,12 @@ public class SinhaProcess
 			SinhaPage newpage = new SinhaPage(i, this);
 			this.pagetable.add(newpage);
 		}
+		this.currentpage = pagetable.get(0);
 	}
 	
 	public SinhaPage getCurrPage()
 	{
-		this.currentpagenum = this.reference / this.size;
+		this.currentpagenum = this.word / this.size;
 		this.currentpage = this.pagetable.get(currentpagenum);
 		return this.currentpage;
 	}
@@ -73,36 +82,36 @@ public class SinhaProcess
 	
 	public int getRef()
 	{
-		return this.reference;
+		return this.word;
 	}
 	
-	public void nextWordToRef() throws FileNotFoundException
+	public void nextWordToRef(Scanner scan1) throws FileNotFoundException
 	{
-		File f = new File("random-numbers.txt");
-		Scanner scan1 = new Scanner(f);
+		//File f = new File("random-numbers.txt");
+		//Scanner scan1 = new Scanner(f);
 		String rstr = scan1.next();
 		//System.out.println(rstr);
 		int r = Integer.parseInt(rstr);
 		y = r / (Integer.MAX_VALUE + 1d);
 		if (y < this.A)
 		{
-			this.reference = (this.reference + 1 + this.size) % this.size;
+			this.word = (this.word + 1 + this.size) % this.size;
 		}
 		else if (y < this.A + this.B)
 		{
-			this.reference = (this.reference - 5 + this.size) % this.size;
+			this.word = (this.word - 5 + this.size) % this.size;
 		}
 		else if (y < this.A + this.B + this.C)
 		{
-			this.reference = (this.reference + 4 + this.size) % this.size;
+			this.word = (this.word + 4 + this.size) % this.size;
 		}
 		else 
 		{
 			int new_random = scan1.nextInt();
-			this.reference = new_random % this.size;
+			this.word = new_random % this.size;
 		}
 		
-		this.currentpagenum = this.reference / this.size;
+		this.currentpagenum = this.word / this.size;
 		this.currentpage = this.pagetable.get(currentpagenum);
 	}
 }

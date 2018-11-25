@@ -1,3 +1,5 @@
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -33,15 +35,20 @@ public class SinhaFrameTable
 	
 	public void setLargestFreeFrame()
 	{
+		int temp = -1;
 		for (int i = ft.length-1; i >= 0; i--)
 		{
+			//if there is no page in the frame then the largest free frame is at this index
 			if (ft[i] == null)
 			{
-				this.largestfreeframe = i;
+				temp = i;
+				break;
 				//return i;
 			}
+			
 		}
-		this.largestfreeframe = -1;
+		//there are no free frames, so we set the largest index to be -1
+		this.largestfreeframe = temp;
 		//return -1;
 	}
 	
@@ -60,10 +67,12 @@ public class SinhaFrameTable
 		return 0;
 	}
 	
-	public int random_replace()
-	{
-		Scanner s = new Scanner("random-numbers.txt");
+	public int random_replace(Scanner s) throws FileNotFoundException
+	{	
+		//File f = new File("random-numbers.txt");
+		//Scanner s = new Scanner(f);
 		int random = s.nextInt();
+		//System.out.println("random is " + random);
 		return random % ft.length; //returns the index of the randomly picked frame
 	}
 }

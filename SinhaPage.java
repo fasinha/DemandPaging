@@ -10,6 +10,7 @@ public class SinhaPage
 	{
 		this.num = num;
 		this.p = p;
+		this.frame = -1;
 	}
 	
 	public void setFrame(int f)
