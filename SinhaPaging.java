@@ -2,8 +2,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
 
-public class SinhaPaging {
-	public static void main(String[] args) throws FileNotFoundException {
+public class SinhaPaging 
+{
+	public static void main(String[] args) throws FileNotFoundException 
+	{
 		int machine = 0; // machine size
 		int pagesize = 0; // page size
 		int process_size = 0; // process size
@@ -12,7 +14,8 @@ public class SinhaPaging {
 		int numOfPages = 0; // number of pages
 		int numOfFrames = 0; // number of frames
 		String algo = ""; // algorithm used
-		if (args[0] == null) {
+		if (args[0] == null) 
+		{
 			System.exit(0);
 		} else {
 			machine = Integer.parseInt(args[0]);
@@ -29,35 +32,43 @@ public class SinhaPaging {
 		File f = new File("random-numbers.txt");
 		Scanner scan = new Scanner(f);
 
-		if (job == 1) {
+		if (job == 1) 
+		{
 			// create one process according to specs
-			SinhaProcess p1 = new SinhaProcess(1, 1, 0, 0, process_size, numOfPages, referencenum);
+			SinhaProcess p1 = new SinhaProcess(1, 1, 0, 0, process_size, numOfPages, referencenum, pagesize);
 			p1.fillPageTable();
 			processes.add(p1);
 		} else if (job == 2) {
 			// create four processes according to specs
-			for (int i = 0; i < 4; i++) {
-				SinhaProcess p2 = new SinhaProcess(i + 1, 1, 0, 0, process_size, numOfPages, referencenum);
+			for (int i = 0; i < 4; i++) 
+			{
+				SinhaProcess p2 = new SinhaProcess(i + 1, 1, 0, 0, process_size, numOfPages, referencenum, pagesize);
 				p2.fillPageTable();
 				processes.add(p2);
 			}
-		} else if (job == 3) {
-			// create one process according to spec
-			SinhaProcess p3 = new SinhaProcess(1, 0, 0, 0, process_size, numOfPages, referencenum);
-			p3.fillPageTable();
-			processes.add(p3);
+		} else if (job == 3) 
+		{
+			// create four process according to spec
+			for (int i = 0; i < 4; i++)
+			{
+				SinhaProcess p3 = new SinhaProcess(1, 0, 0, 0, process_size, numOfPages, referencenum, pagesize);
+				p3.fillPageTable();
+				processes.add(p3);
+			}
 
-		} else if (job == 4) {
+		} else if (job == 4) 
+		{
 			// create four processes according to spec
-			SinhaProcess p4 = new SinhaProcess(1, .75, .25, 0, process_size, numOfPages, referencenum);
-			SinhaProcess p5 = new SinhaProcess(2, .75, 0, .25, process_size, numOfPages, referencenum);
-			SinhaProcess p6 = new SinhaProcess(3, .75, .125, .125, process_size, numOfPages, referencenum);
-			SinhaProcess p7 = new SinhaProcess(4, .5, .125, .125, process_size, numOfPages, referencenum);
+			SinhaProcess p4 = new SinhaProcess(1, .75, .25, 0, process_size, numOfPages, referencenum, pagesize);
+			SinhaProcess p5 = new SinhaProcess(2, .75, 0, .25, process_size, numOfPages, referencenum, pagesize);
+			SinhaProcess p6 = new SinhaProcess(3, .75, .125, .125, process_size, numOfPages, referencenum, pagesize);
+			SinhaProcess p7 = new SinhaProcess(4, .5, .125, .125, process_size, numOfPages, referencenum, pagesize);
 			processes.add(p4);
 			processes.add(p5);
 			processes.add(p6);
 			processes.add(p7);
-			for (SinhaProcess process : processes) {
+			for (SinhaProcess process : processes) 
+			{
 				process.fillPageTable();
 			}
 		}
@@ -69,6 +80,7 @@ public class SinhaPaging {
 		//START
 		int totalfaults = 0;
 		int totalresidence = 0;
+		int totalevictions = 0;
 		System.out.println("The machine size is " + machine);
 		System.out.println("The page size is " + pagesize);
 		System.out.println("The process size is " + process_size);
@@ -83,17 +95,41 @@ public class SinhaPaging {
 			for (SinhaPage page : p.pagetable)
 			{
 				p.evictions += page.numevictions;
-				//p.residence += page.pageresidence;
+				p.residence += page.runningsum;
 			}
-			//int avgres_process = p.residence / p.evictions;
-			int avgres_process = 0;
-			System.out.print("Process " + p.getID() + " had " + p.faults + " faults and ");
-			System.out.println(avgres_process + " average residency.");
+			
+			if (p.evictions != 0)
+			{
+				double avgres_process = (double) p.residence / (double) p.evictions;
+				//int avgres_process = 0;
+				if (p.faults == 1)
+				{
+					System.out.print("Process " + p.getID() + " had " + p.faults + " fault.");
+				}
+				else {
+					System.out.print("Process " + p.getID() + " had " + p.faults + " faults and ");
+				}
+				
+				System.out.println(avgres_process + " average residency.");
+			}
+			else {
+				if (p.faults == 1)
+				{
+					System.out.println("Process " + p.getID() + " had " + p.faults + " fault.");
+				}
+				else {
+					System.out.println("Process " + p.getID() + " had " + p.faults + " faults.");
+				}
+				
+				System.out.println("\tWith no evictions, the average residence is undefined.");
+			}
+			
 			totalfaults += p.faults;
 			totalresidence += p.residence;
+			totalevictions += p.evictions;
 		}
 		
-		int avgresidence = totalresidence / processes.size();
+		double avgresidence = (double) totalresidence / (double) totalevictions;
 		System.out.println("The total number of faults is " + totalfaults +
 				" and the overall average residency is " + avgresidence + ".");
 
@@ -156,18 +192,19 @@ public class SinhaPaging {
 									if (frametable.ft[evictindex] != null) 
 									{
 										//current.evictions++;
-										SinhaPage toevict = frametable.ft[evictindex];
+										SinhaPage toevict = frametable.ft[evictindex]; //get the page to evict 
 										//System.out.println("to evict: " + toevict + " current: " + current.currentpage);
-										toevict.numevictions++;
-										toevict.evict = currentcycle; //JUST ADDED
-										toevict.pageresidence = toevict.evict - toevict.start; //JUST ADDED
-										current.residence += toevict.pageresidence; //JUST ADDED
-										frametable.stack.add(current.currentpage);
-										toevict.setFrame(-1);
-										frametable.ft[evictindex] = current.currentpage;
+										toevict.numevictions++; //increment number of evictions for this page
+										toevict.evict = currentcycle; //set the evict time to this cycle
+										toevict.pageresidence = toevict.evict - toevict.start; //calculate this page's residence time
+										toevict.runningsum += toevict.pageresidence; 
+										//current.residence += toevict.pageresidence; //add this page's residence time to the process residence time
+										frametable.stack.add(current.currentpage); //add the process's current page to the stack for LIFO
+										toevict.setFrame(-1); //set the evicted page's frame to -1 because it is evicted
+										frametable.ft[evictindex] = current.currentpage; //place the current page into the now empty page frame
 										
-										current.currentpage.setFrame(evictindex);
-										current.currentpage.start = currentcycle; //JUST ADDED
+										current.currentpage.setFrame(evictindex); //set the frame to the new index
+										current.currentpage.start = currentcycle; //start this page's time
 										
 									}
 
@@ -184,7 +221,8 @@ public class SinhaPaging {
 										toevict.numevictions++;
 										toevict.evict = currentcycle; //JUST ADDED
 										toevict.pageresidence = toevict.evict - toevict.start; //JUST ADDED
-										current.residence += toevict.pageresidence; //JUST ADDED
+										toevict.runningsum += toevict.pageresidence; 
+										//current.residence += toevict.pageresidence; //JUST ADDED
 										frametable.stack.add(current.currentpage);
 										toevict.setFrame(-1);
 										frametable.ft[evictindex] = current.currentpage;
@@ -201,11 +239,12 @@ public class SinhaPaging {
 							//current.referencechanging--;
 						}
 						System.out.println(current.getID() + " references word " + current.word + " at cycle " + currentcycle + 
-								" is fault? " + current.isFault);
+								" is fault? " + current.isFault + " page: " + current.currentpagenum);
 						current.referencechanging--; //we have completed one reference
-						current.nextWordToRef(scan); 
-						current.isFault = false;
+						current.nextWordToRef(scan); //get the next word to reference 
+						current.isFault = false; //reset the isFault boolean to false
 						currentcycle++; //increment the cycle
+						
 						//current.nextWordToRef(scan); //get the next reference for this process
 						//System.out.println(current.referencechanging);
 					}

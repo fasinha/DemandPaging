@@ -9,6 +9,7 @@ public class SinhaPage
 	int evict; 
 	int pageresidence;
 	int numevictions;
+	int runningsum; 
 	
 	public SinhaPage(int num, SinhaProcess p)
 	{
@@ -19,6 +20,7 @@ public class SinhaPage
 		evict = 0;
 		pageresidence = 0;
 		numevictions = 0;
+		runningsum = 0;
 	}
 	
 	public void setFrame(int f)

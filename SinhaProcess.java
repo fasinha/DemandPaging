@@ -19,10 +19,12 @@ public class SinhaProcess
 	int referencechanging;
 	boolean isFault; 
 	
+	int size_of_page; 
+	
 	ArrayList<SinhaPage> pagetable;
 	private double y;
 	
-	public SinhaProcess(int id, double a, double b, double c, int size, int numOfPages, int referencenum) throws FileNotFoundException
+	public SinhaProcess(int id, double a, double b, double c, int size, int numOfPages, int referencenum, int size_of_page) throws FileNotFoundException
 	{
 		this.id = id;
 		this.A = a;
@@ -39,6 +41,8 @@ public class SinhaProcess
 		this.currentpage = null;
 		referencechanging = referencenum;
 		this.isFault = false;
+		
+		this.size_of_page = size_of_page;
 		//nextWordToRef();
 		//this.currentpage = this.word / this.size;
 	}
@@ -89,9 +93,9 @@ public class SinhaProcess
 	{
 		//File f = new File("random-numbers.txt");
 		//Scanner scan1 = new Scanner(f);
-		String rstr = scan1.next();
+		//String rstr = scan1.next();
 		//System.out.println(rstr);
-		int r = Integer.parseInt(rstr);
+		int r = scan1.nextInt();
 		y = r / (Integer.MAX_VALUE + 1d);
 		if (y < this.A)
 		{
@@ -111,7 +115,7 @@ public class SinhaProcess
 			this.word = new_random % this.size;
 		}
 		
-		this.currentpagenum = this.word / this.size;
+		this.currentpagenum = this.word / this.size_of_page;
 		this.currentpage = this.pagetable.get(currentpagenum);
 	}
 }
