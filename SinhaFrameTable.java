@@ -3,12 +3,14 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
+import java.util.Stack;
 
 public class SinhaFrameTable 
 {
 	SinhaPage[] ft;
 	int[] frameindices;
 	ArrayList<SinhaPage> pagelist;
+	Stack<SinhaPage> stack;
 	
 	private int largestfreeframe; //index of largest free frame in ft
 	
@@ -18,7 +20,7 @@ public class SinhaFrameTable
 		this.ft = new SinhaPage[fsize];
 		this.frameindices = new int[fsize];
 		this.largestfreeframe = fsize-1;
-		
+		stack = new Stack<SinhaPage>();
 	}
 	
 	public int findProcess(SinhaProcess p)
@@ -64,7 +66,7 @@ public class SinhaFrameTable
 	
 	public int lifo_replace()
 	{
-		return 0;
+		return stack.pop().getFrameFromPage();
 	}
 	
 	public int random_replace(Scanner s) throws FileNotFoundException

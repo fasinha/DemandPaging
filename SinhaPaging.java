@@ -65,6 +65,10 @@ public class SinhaPaging {
 		SinhaFrameTable frametable = new SinhaFrameTable(numOfFrames); // create new frame table
 		roundRobin(processes, frametable, algo, scan); // run round robin for memory references
 
+		//PRINT RESULTS HERE 
+		//START
+		int totalfaults = 0;
+		int totalresidence = 0;
 		System.out.println("The machine size is " + machine);
 		System.out.println("The page size is " + pagesize);
 		System.out.println("The process size is " + process_size);
@@ -73,15 +77,34 @@ public class SinhaPaging {
 		System.out.println("The replacement algorithm is " + algo);
 		System.out.println("The level of debugging output is " + args[6]);
 		System.out.println();
-		for (SinhaProcess p : processes) {
-			System.out.println("Process " + p.getID() + " had " + p.faults + " faults.");
-
+		
+		for (SinhaProcess p : processes) 
+		{
+			for (SinhaPage page : p.pagetable)
+			{
+				p.evictions += page.numevictions;
+				//p.residence += page.pageresidence;
+			}
+			//int avgres_process = p.residence / p.evictions;
+			int avgres_process = 0;
+			System.out.print("Process " + p.getID() + " had " + p.faults + " faults and ");
+			System.out.println(avgres_process + " average residency.");
+			totalfaults += p.faults;
+			totalresidence += p.residence;
 		}
+		
+		int avgresidence = totalresidence / processes.size();
+		System.out.println("The total number of faults is " + totalfaults +
+				" and the overall average residency is " + avgresidence + ".");
 
+		//FINISHED PRINTING RESULTS 
 	}
 
-	public static void roundRobin(ArrayList<SinhaProcess> processes, SinhaFrameTable frametable, String algo, Scanner scan) throws FileNotFoundException {
-		ArrayList<SinhaProcess> temp = new ArrayList<SinhaProcess>();
+	public static void roundRobin(ArrayList<SinhaProcess> processes, SinhaFrameTable frametable, String algo, Scanner scan) throws FileNotFoundException 
+	{
+		
+		ArrayList<SinhaProcess> temp = new ArrayList<SinhaProcess>(); //create a temporary list of processes 
+		//copy in the processes 
 		for (SinhaProcess p : processes) 
 		{
 			temp.add(p);
@@ -104,38 +127,71 @@ public class SinhaPaging {
 						//current.referencechanging--;
 						if (current.currentpage == null || current.currentpage.getFrameFromPage() == -1) // if we have a page fault
 						{
-							System.out.println("current page is " + current.currentpage);
+							//System.out.println("current page is " + current.currentpage);
 							current.isFault = true;
 							current.faults++; // increment fault
 							frametable.setLargestFreeFrame();
 							if (frametable.getLargestFreeFrame() != -1) // if there is still a free frame
 							{
-								System.out.println("hola");
+								//System.out.println("hola");
 								int frametoload = frametable.getLargestFreeFrame();
-								System.out.println(frametoload);
+								//System.out.println(frametoload);
 								frametable.ft[frametoload] = current.currentpage;
-								System.out.println(current.currentpage);
+								frametable.stack.add(current.currentpage); //add the page to the stack. used for LIFO algorithm.
+								//System.out.println(current.currentpage);
 								current.currentpage.setFrame(frametoload);
 								frametable.setLargestFreeFrame();
+								current.currentpage.start = currentcycle; //JUST ADDED
+								 
 							} else 
 							{
 								// we must do the page replacement algorithm
 								if (algo.equals("lru")) 
 								{
 									frametable.lru_replace();
-								} else if (algo.equals("lifo")) 
+								} 
+								else if (algo.equals("lifo")) 
 								{
-									frametable.lifo_replace();
-								} else if (algo.equals("random")) 
+									int evictindex = frametable.lifo_replace();
+									if (frametable.ft[evictindex] != null) 
+									{
+										//current.evictions++;
+										SinhaPage toevict = frametable.ft[evictindex];
+										//System.out.println("to evict: " + toevict + " current: " + current.currentpage);
+										toevict.numevictions++;
+										toevict.evict = currentcycle; //JUST ADDED
+										toevict.pageresidence = toevict.evict - toevict.start; //JUST ADDED
+										current.residence += toevict.pageresidence; //JUST ADDED
+										frametable.stack.add(current.currentpage);
+										toevict.setFrame(-1);
+										frametable.ft[evictindex] = current.currentpage;
+										
+										current.currentpage.setFrame(evictindex);
+										current.currentpage.start = currentcycle; //JUST ADDED
+										
+									}
+
+								} 
+								else if (algo.equals("random")) 
 								{
 									// System.out.println("hi");
 									int evictindex = frametable.random_replace(scan);
 									if (frametable.ft[evictindex] != null) 
 									{
+										//current.evictions++;
 										SinhaPage toevict = frametable.ft[evictindex];
+										//System.out.println("to evict: " + toevict + " current: " + current.currentpage);
+										toevict.numevictions++;
+										toevict.evict = currentcycle; //JUST ADDED
+										toevict.pageresidence = toevict.evict - toevict.start; //JUST ADDED
+										current.residence += toevict.pageresidence; //JUST ADDED
+										frametable.stack.add(current.currentpage);
 										toevict.setFrame(-1);
 										frametable.ft[evictindex] = current.currentpage;
+										
 										current.currentpage.setFrame(evictindex);
+										current.currentpage.start = currentcycle; //JUST ADDED
+										
 									}
 								}
 							}
@@ -144,9 +200,11 @@ public class SinhaPaging {
 							// we have a hit
 							//current.referencechanging--;
 						}
-						System.out.println(current.getID() + " references word " + current.word + " at cycle " + currentcycle + " " + current.isFault);
+						System.out.println(current.getID() + " references word " + current.word + " at cycle " + currentcycle + 
+								" is fault? " + current.isFault);
 						current.referencechanging--; //we have completed one reference
 						current.nextWordToRef(scan); 
+						current.isFault = false;
 						currentcycle++; //increment the cycle
 						//current.nextWordToRef(scan); //get the next reference for this process
 						//System.out.println(current.referencechanging);
@@ -155,6 +213,7 @@ public class SinhaPaging {
 				}
 				if (current.referencechanging > 0)
 				{
+					current.isFault = false;
 					//temp.remove(current);
 					temp.add(current);
 					//temp.remove(current);

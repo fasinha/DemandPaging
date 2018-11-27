@@ -12,7 +12,7 @@ public class SinhaProcess
 	int size; 
 	int numOfPages; 
 	int residence;
-	int evicted;
+	int evictions;
 	SinhaPage currentpage; 
 	int currentpagenum;
 	int faults;
@@ -33,7 +33,7 @@ public class SinhaProcess
 		this.referencenum = referencenum;
 		this.word = (111*id + this.size) % this.size;
 		this.residence =0;
-		this.evicted = 0;
+		this.evictions = 0;
 		this.currentpagenum = this.word / this.size;
 		this.pagetable = new ArrayList<SinhaPage>();
 		this.currentpage = null;
