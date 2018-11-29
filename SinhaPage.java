@@ -4,7 +4,7 @@ public class SinhaPage
 	private int num;
 	private int frame;
 	private SinhaProcess p;
-	private int lastref;
+	int lastref;
 	int start;
 	int evict; 
 	int pageresidence;

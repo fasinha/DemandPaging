@@ -36,14 +36,14 @@ public class SinhaPaging
 		{
 			// create one process according to specs
 			SinhaProcess p1 = new SinhaProcess(1, 1, 0, 0, process_size, numOfPages, referencenum, pagesize);
-			p1.fillPageTable();
+			p1.fillPageTable(scan);
 			processes.add(p1);
 		} else if (job == 2) {
 			// create four processes according to specs
 			for (int i = 0; i < 4; i++) 
 			{
 				SinhaProcess p2 = new SinhaProcess(i + 1, 1, 0, 0, process_size, numOfPages, referencenum, pagesize);
-				p2.fillPageTable();
+				p2.fillPageTable(scan);
 				processes.add(p2);
 			}
 		} else if (job == 3) 
@@ -52,7 +52,7 @@ public class SinhaPaging
 			for (int i = 0; i < 4; i++)
 			{
 				SinhaProcess p3 = new SinhaProcess(1, 0, 0, 0, process_size, numOfPages, referencenum, pagesize);
-				p3.fillPageTable();
+				p3.fillPageTable(scan);
 				processes.add(p3);
 			}
 
@@ -63,14 +63,20 @@ public class SinhaPaging
 			SinhaProcess p5 = new SinhaProcess(2, .75, 0, .25, process_size, numOfPages, referencenum, pagesize);
 			SinhaProcess p6 = new SinhaProcess(3, .75, .125, .125, process_size, numOfPages, referencenum, pagesize);
 			SinhaProcess p7 = new SinhaProcess(4, .5, .125, .125, process_size, numOfPages, referencenum, pagesize);
+			p4.fillPageTable(scan);
+			p5.fillPageTable(scan);
+			p6.fillPageTable(scan);
+			p7.fillPageTable(scan);
 			processes.add(p4);
 			processes.add(p5);
 			processes.add(p6);
 			processes.add(p7);
+			
+			/*
 			for (SinhaProcess process : processes) 
 			{
-				process.fillPageTable();
-			}
+				process.fillPageTable(scan);
+			} */
 		}
 
 		SinhaFrameTable frametable = new SinhaFrameTable(numOfFrames); // create new frame table
@@ -104,7 +110,7 @@ public class SinhaPaging
 				//int avgres_process = 0;
 				if (p.faults == 1)
 				{
-					System.out.print("Process " + p.getID() + " had " + p.faults + " fault.");
+					System.out.print("Process " + p.getID() + " had " + p.faults + " fault and ");
 				}
 				else {
 					System.out.print("Process " + p.getID() + " had " + p.faults + " faults and ");
@@ -156,13 +162,16 @@ public class SinhaPaging
 				// this process's round robin time starts
 				for (int ref = 0; ref < quantum; ref++) 
 				{
-					// current.nextWordToRef(); //get the next word reference
+					//System.out.println("Process " + current.getID() + " word " + current.word);
+					//current.nextWordToRef(scan); //get the next word reference
 					//if we have not exhausted all the references for this process
 					if (current.referencechanging > 0) 
 					{
+						//frametable.pagerefs.add(current.currentpage);
 						//current.referencechanging--;
 						if (current.currentpage == null || current.currentpage.getFrameFromPage() == -1) // if we have a page fault
 						{
+							
 							//System.out.println("current page is " + current.currentpage);
 							current.isFault = true;
 							current.faults++; // increment fault
@@ -177,14 +186,34 @@ public class SinhaPaging
 								//System.out.println(current.currentpage);
 								current.currentpage.setFrame(frametoload);
 								frametable.setLargestFreeFrame();
-								current.currentpage.start = currentcycle; //JUST ADDED
+								current.currentpage.start = currentcycle; 
+								frametable.pagerefs.add(current.currentpage);
 								 
 							} else 
 							{
 								// we must do the page replacement algorithm
 								if (algo.equals("lru")) 
 								{
-									frametable.lru_replace();
+									frametable.pagerefs.add(current.currentpage);
+									int evictindex = frametable.lru_replace();
+									System.out.println(evictindex);
+									//current.evictions++;
+									SinhaPage toevict = frametable.ft[evictindex]; //get the page to evict 
+									//System.out.println("to evict: " + toevict + " current: " + current.currentpage);
+									toevict.numevictions++; //increment number of evictions for this page
+									toevict.evict = currentcycle; //set the evict time to this cycle
+									toevict.pageresidence = toevict.evict - toevict.start; //calculate this page's residence time
+									toevict.runningsum += toevict.pageresidence; 
+									//current.residence += toevict.pageresidence; //add this page's residence time to the process residence time
+									frametable.stack.add(current.currentpage); //add the process's current page to the stack for LIFO
+									frametable.pagerefs.add(current.currentpage);
+									toevict.setFrame(-1); //set the evicted page's frame to -1 because it is evicted
+									frametable.ft[evictindex] = current.currentpage; //place the current page into the now empty page frame
+									
+									current.currentpage.setFrame(evictindex); //set the frame to the new index
+									current.currentpage.start = currentcycle; //start this page's time
+									
+									
 								} 
 								else if (algo.equals("lifo")) 
 								{
@@ -205,7 +234,6 @@ public class SinhaPaging
 										
 										current.currentpage.setFrame(evictindex); //set the frame to the new index
 										current.currentpage.start = currentcycle; //start this page's time
-										
 									}
 
 								} 
@@ -245,9 +273,11 @@ public class SinhaPaging
 						current.isFault = false; //reset the isFault boolean to false
 						currentcycle++; //increment the cycle
 						
+						
 						//current.nextWordToRef(scan); //get the next reference for this process
 						//System.out.println(current.referencechanging);
 					}
+					//frametable.pagerefs.clear();
 					
 				}
 				if (current.referencechanging > 0)

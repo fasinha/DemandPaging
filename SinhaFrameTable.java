@@ -9,7 +9,9 @@ public class SinhaFrameTable
 {
 	SinhaPage[] ft;
 	int[] frameindices;
-	ArrayList<SinhaPage> pagelist;
+	
+	ArrayList<SinhaPage> pagerefs;
+	
 	Stack<SinhaPage> stack;
 	
 	private int largestfreeframe; //index of largest free frame in ft
@@ -21,6 +23,7 @@ public class SinhaFrameTable
 		this.frameindices = new int[fsize];
 		this.largestfreeframe = fsize-1;
 		stack = new Stack<SinhaPage>();
+		pagerefs = new ArrayList<SinhaPage>();
 	}
 	
 	public int findProcess(SinhaProcess p)
@@ -61,7 +64,11 @@ public class SinhaFrameTable
 	
 	public int lru_replace()
 	{
-		return 0;
+		SinhaPage p = pagerefs.get(0);
+		int answer = p.getFrameFromPage();
+		pagerefs.remove(p);
+		return answer;
+		
 	}
 	
 	public int lifo_replace()
@@ -74,7 +81,7 @@ public class SinhaFrameTable
 		//File f = new File("random-numbers.txt");
 		//Scanner s = new Scanner(f);
 		int random = s.nextInt();
-		//System.out.println("random is " + random);
+		System.out.println("random is " + random);
 		return random % ft.length; //returns the index of the randomly picked frame
 	}
 }
