@@ -1,16 +1,19 @@
 
 public class SinhaPage 
 {
-	private int num;
-	private int frame;
-	private SinhaProcess p;
-	int lastref;
-	int start;
-	int evict; 
-	int pageresidence;
-	int numevictions;
-	int runningsum; 
+	private int num; //page number
+	private int frame; //frame the page is currently in
+	private SinhaProcess p; //process the page corresponds to 
+	int lastref; //the last reference for this page
+	int start; //time page is loaded in frame
+	int evict; //time page is evicted from frame
+	int pageresidence; //residence time for this page
+	int numevictions; //number of times page was evicted
+	int runningsum; //running sum used for output calculation
 	
+	/*
+	 * instantiates a new page with id number and corresponding process
+	 */
 	public SinhaPage(int num, SinhaProcess p)
 	{
 		this.num = num;
@@ -23,28 +26,28 @@ public class SinhaPage
 		runningsum = 0;
 	}
 	
+	/*
+	 * places the page into a frame
+	 */
 	public void setFrame(int f)
 	{
 		this.frame = f;
 	}
 	
+	/*
+	 * returns the page's process
+	 */
 	public SinhaProcess getPageProcess()
 	{
 		return this.p;
 	}
 	
+	/*
+	 * returns the page's frame
+	 */
 	public int getFrameFromPage()
 	{
 		return this.frame;
 	}
 	
-	public int getLastRef()
-	{
-		return this.lastref;
-	}
-	
-	public void setLastRef(int ref)
-	{
-		this.lastref = ref;
-	}
 }

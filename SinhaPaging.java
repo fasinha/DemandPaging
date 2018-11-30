@@ -29,14 +29,15 @@ public class SinhaPaging
 		}
 
 		ArrayList<SinhaProcess> processes = new ArrayList<SinhaProcess>(); // list of processes
-		File f = new File("random-numbers.txt");
-		Scanner scan = new Scanner(f);
+		File f = new File("random-numbers.txt"); 
+		Scanner scan = new Scanner(f); //read in the random number file
 
+		//go through the possible job mixes and create the processes according to the spec
 		if (job == 1) 
 		{
 			// create one process according to specs
 			SinhaProcess p1 = new SinhaProcess(1, 1, 0, 0, process_size, numOfPages, referencenum, pagesize);
-			p1.fillPageTable(scan);
+			p1.fillPageTable(scan); 
 			processes.add(p1);
 		} else if (job == 2) {
 			// create four processes according to specs
@@ -71,12 +72,6 @@ public class SinhaPaging
 			processes.add(p5);
 			processes.add(p6);
 			processes.add(p7);
-			
-			/*
-			for (SinhaProcess process : processes) 
-			{
-				process.fillPageTable(scan);
-			} */
 		}
 
 		SinhaFrameTable frametable = new SinhaFrameTable(numOfFrames); // create new frame table
@@ -142,6 +137,9 @@ public class SinhaPaging
 		//FINISHED PRINTING RESULTS 
 	}
 
+	/*
+	 * this method runs the main part of the program and gives each process 3 turns to simulate memory references
+	 */
 	public static void roundRobin(ArrayList<SinhaProcess> processes, SinhaFrameTable frametable, String algo, Scanner scan) throws FileNotFoundException 
 	{
 		
@@ -163,7 +161,6 @@ public class SinhaPaging
 				for (int ref = 0; ref < quantum; ref++) 
 				{
 					//System.out.println("Process " + current.getID() + " word " + current.word);
-					//current.nextWordToRef(scan); //get the next word reference
 					//if we have not exhausted all the references for this process
 					if (current.referencechanging > 0) 
 					{
@@ -171,23 +168,19 @@ public class SinhaPaging
 						//current.referencechanging--;
 						if (current.currentpage == null || current.currentpage.getFrameFromPage() == -1) // if we have a page fault
 						{
-							
 							//System.out.println("current page is " + current.currentpage);
 							current.isFault = true;
 							current.faults++; // increment fault
 							frametable.setLargestFreeFrame();
 							if (frametable.getLargestFreeFrame() != -1) // if there is still a free frame
 							{
-								//System.out.println("hola");
 								int frametoload = frametable.getLargestFreeFrame();
-								//System.out.println(frametoload);
 								frametable.ft[frametoload] = current.currentpage;
 								frametable.stack.add(current.currentpage); //add the page to the stack. used for LIFO algorithm.
-								//System.out.println(current.currentpage);
 								current.currentpage.setFrame(frametoload);
 								frametable.setLargestFreeFrame();
 								current.currentpage.start = currentcycle; 
-								frametable.pagerefs.add(current.currentpage);
+								frametable.pagerefs.add(current.currentpage); //add the page to the list used for LRU algorithm
 								 
 							} else 
 							{
@@ -197,14 +190,12 @@ public class SinhaPaging
 									frametable.pagerefs.add(current.currentpage);
 									int evictindex = frametable.lru_replace();
 									System.out.println(evictindex);
-									//current.evictions++;
 									SinhaPage toevict = frametable.ft[evictindex]; //get the page to evict 
 									//System.out.println("to evict: " + toevict + " current: " + current.currentpage);
 									toevict.numevictions++; //increment number of evictions for this page
 									toevict.evict = currentcycle; //set the evict time to this cycle
 									toevict.pageresidence = toevict.evict - toevict.start; //calculate this page's residence time
-									toevict.runningsum += toevict.pageresidence; 
-									//current.residence += toevict.pageresidence; //add this page's residence time to the process residence time
+									toevict.runningsum += toevict.pageresidence;
 									frametable.stack.add(current.currentpage); //add the process's current page to the stack for LIFO
 									frametable.pagerefs.add(current.currentpage);
 									toevict.setFrame(-1); //set the evicted page's frame to -1 because it is evicted
@@ -261,13 +252,11 @@ public class SinhaPaging
 									}
 								}
 							}
-							//current.referencechanging--;
 						} else {
-							// we have a hit
-							//current.referencechanging--;
 						}
+						/*
 						System.out.println(current.getID() + " references word " + current.word + " at cycle " + currentcycle + 
-								" is fault? " + current.isFault + " page: " + current.currentpagenum);
+								" is fault? " + current.isFault + " page: " + current.currentpagenum); */
 						current.referencechanging--; //we have completed one reference
 						current.nextWordToRef(scan); //get the next word to reference 
 						current.isFault = false; //reset the isFault boolean to false

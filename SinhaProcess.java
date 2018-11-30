@@ -22,7 +22,7 @@ public class SinhaProcess
 	
 	int size_of_page; //size of the pages
 	
-	ArrayList<SinhaPage> pagetable; //list of all the pages
+	ArrayList<SinhaPage> pagetable; //list of all the pages for this process 
 	private double y; //used in the method for determining the next reference
 	
 	/*

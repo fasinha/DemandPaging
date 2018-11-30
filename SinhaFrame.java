@@ -1,33 +1,23 @@
 
 public class SinhaFrame
 {
-	int id;
+	int frameid;
 	boolean isEmpty;
-	int lastUse;
-	int recentUse;
-	SinhaProcess p;
 	SinhaPage page;
 	
 	public SinhaFrame()
 	{
 		isEmpty = true;
-		lastUse = -1;
-		recentUse = -1;
-		//page = -1;
+		frameid = -1;
 	}
 	
-	public boolean setInitialProcess(SinhaProcess p)
+	public SinhaFrame(int frameid)
 	{
-		isEmpty = false;
-		this.p = p;
-		this.page = p.getCurrPage();
-		return true; 
+		isEmpty = true;
+		this.frameid = frameid;
 	}
 	
-	public SinhaProcess getProcess()
-	{
-		return p;
-	}
+	
 }
 
 

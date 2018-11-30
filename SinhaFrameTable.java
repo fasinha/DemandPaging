@@ -7,20 +7,18 @@ import java.util.Stack;
 
 public class SinhaFrameTable 
 {
-	SinhaPage[] ft;
-	int[] frameindices;
+	SinhaPage[] ft; //the list of pages currently in the frame table
 	
-	ArrayList<SinhaPage> pagerefs;
+	ArrayList<SinhaPage> pagerefs; //list used for LRU
 	
-	Stack<SinhaPage> stack;
+	Stack<SinhaPage> stack; //stack used for LIFO
 	
-	private int largestfreeframe; //index of largest free frame in ft
+	private int largestfreeframe; //index of largest free frame in frame table 
 	
 	
 	public SinhaFrameTable(int fsize)
 	{
 		this.ft = new SinhaPage[fsize];
-		this.frameindices = new int[fsize];
 		this.largestfreeframe = fsize-1;
 		stack = new Stack<SinhaPage>();
 		pagerefs = new ArrayList<SinhaPage>();
@@ -38,6 +36,11 @@ public class SinhaFrameTable
 		return -1;
 	}
 	
+	/*
+	 * sets the largest free frame
+	 * loop from the end of the frame table and if there is nothing in the frame, set the largest free frame to that index
+	 * if there are no free frames, set the largest to -1;
+	 */
 	public void setLargestFreeFrame()
 	{
 		int temp = -1;
@@ -54,32 +57,50 @@ public class SinhaFrameTable
 		}
 		//there are no free frames, so we set the largest index to be -1
 		this.largestfreeframe = temp;
-		//return -1;
+		
 	}
 	
+	/*
+	 * returns largest free frame
+	 */
 	public int getLargestFreeFrame()
 	{
 		return this.largestfreeframe;
 	}
 	
+	/*
+	 * LRU replacement algorithm
+	 * this method removes the first page in the list, which references the least recently used
+	 * non evicted pages are not members of this list
+	 * returns the frame of the page
+	 */
 	public int lru_replace()
 	{
 		SinhaPage p = pagerefs.get(0);
 		int answer = p.getFrameFromPage();
 		pagerefs.remove(p);
 		return answer;
-		
 	}
 	
+	/*
+	 * LIFO replacement algorithm
+	 * this method removes the first page in the stack, which references the last inserted page
+	 * non evicted pages are not members of this list
+	 * returns the frame of the page
+	 */
 	public int lifo_replace()
 	{
 		return stack.pop().getFrameFromPage();
 	}
 	
+	/*
+	 * random replacement algorithm
+	 * this method removes a random page in the list
+	 * non evicted pages are not members of this list
+	 * returns the frame of the page
+	 */
 	public int random_replace(Scanner s) throws FileNotFoundException
 	{	
-		//File f = new File("random-numbers.txt");
-		//Scanner s = new Scanner(f);
 		int random = s.nextInt();
 		System.out.println("random is " + random);
 		return random % ft.length; //returns the index of the randomly picked frame
