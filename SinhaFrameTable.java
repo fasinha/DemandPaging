@@ -9,31 +9,26 @@ public class SinhaFrameTable
 {
 	SinhaPage[] ft; //the list of pages currently in the frame table
 	
+	HashMap<Integer, SinhaPage> hash = new HashMap<Integer, SinhaPage>(); 
+	
 	ArrayList<SinhaPage> pagerefs; //list used for LRU
 	
 	Stack<SinhaPage> stack; //stack used for LIFO
 	
-	private int largestfreeframe; //index of largest free frame in frame table 
+	int largestfreeframe; //index of largest free frame in frame table 
 	
 	
 	public SinhaFrameTable(int fsize)
 	{
+		for (int i=0; i <fsize; i++)
+		{
+			hash.put(i, null);
+		}
+		
 		this.ft = new SinhaPage[fsize];
 		this.largestfreeframe = fsize-1;
 		stack = new Stack<SinhaPage>();
 		pagerefs = new ArrayList<SinhaPage>();
-	}
-	
-	public int findProcess(SinhaProcess p)
-	{
-		for (SinhaPage f : ft)
-		{
-			if (f.getPageProcess().getID() == p.getID() && f.getPageProcess().currentpage == p.currentpage)
-			{
-				return 1;
-			}
-		}
-		return -1;
 	}
 	
 	/*
@@ -47,7 +42,8 @@ public class SinhaFrameTable
 		for (int i = ft.length-1; i >= 0; i--)
 		{
 			//if there is no page in the frame then the largest free frame is at this index
-			if (ft[i] == null)
+			//if (ft[i] == null)
+			if (hash.get(i) == null)
 			{
 				temp = i;
 				break;
@@ -78,7 +74,7 @@ public class SinhaFrameTable
 	{
 		SinhaPage p = pagerefs.get(0);
 		int answer = p.getFrameFromPage();
-		pagerefs.remove(p);
+		pagerefs.remove(pagerefs.get(0));
 		return answer;
 	}
 	

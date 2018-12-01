@@ -11,6 +11,8 @@ public class SinhaPage
 	int numevictions; //number of times page was evicted
 	int runningsum; //running sum used for output calculation
 	
+	//private SinhaFrame frame = new SinhaFrame(-1); 
+	
 	/*
 	 * instantiates a new page with id number and corresponding process
 	 */
@@ -25,6 +27,13 @@ public class SinhaPage
 		numevictions = 0;
 		runningsum = 0;
 	}
+	
+	/*
+	public void setFrame(SinhaFrame f)
+	{
+		this.frame= f;
+	} */
+	
 	
 	/*
 	 * places the page into a frame

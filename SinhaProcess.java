@@ -20,6 +20,7 @@ public class SinhaProcess
 	int referencechanging; //modifiable number of references that gets decremented at every reference
 	boolean isFault; //indicates if process currently has page fault with the current page
 	
+	int r; 
 	int size_of_page; //size of the pages
 	
 	ArrayList<SinhaPage> pagetable; //list of all the pages for this process 
@@ -45,44 +46,49 @@ public class SinhaProcess
 		this.size = size;
 		this.numOfPages = numOfPages;
 		this.referencenum = referencenum;
+		this.size_of_page = size_of_page;
+		
+		
+		
 		this.word = (111*id + this.size) % this.size;
 		this.residence =0;
 		this.evictions = 0;
-		this.currentpagenum = this.word / this.size;
-		this.pagetable = new ArrayList<SinhaPage>();
-		this.currentpage = null;
-		referencechanging = referencenum;
-		this.isFault = false;
 		
-		this.size_of_page = size_of_page;
-		//nextWordToRef();
-		//this.currentpage = this.word / this.size;
-	}
-	
-	/*
-	 * fills the page list with the appropriate number of pages
-	 */
-	public void fillPageTable(Scanner scan) throws FileNotFoundException
-	{
+		this.currentpagenum = this.word / this.size_of_page;
+		this.pagetable = new ArrayList<SinhaPage>();
+		
 		for (int i = 0; i < numOfPages; i++)
 		{
 			SinhaPage newpage = new SinhaPage(i, this);
 			this.pagetable.add(newpage);
 		}
-		this.currentpagenum = this.word / this.size_of_page;
+		
 		this.currentpage = this.pagetable.get(currentpagenum);
-		//nextWordToRef(scan);
+		referencechanging = referencenum;
+		this.isFault = false;
+		
+		
+		this.r = 0;
+		
 	}
 	
 	/*
-	 * returns the current page 
+	 * fills the page list with the appropriate number of pages
 	 */
-	public SinhaPage getCurrPage()
+	public void fillPageTable() throws FileNotFoundException
 	{
-		this.currentpagenum = this.word / this.size;
-		this.currentpage = this.pagetable.get(currentpagenum);
-		return this.currentpage;
+		/*
+		for (int i = 0; i < numOfPages; i++)
+		{
+			SinhaPage newpage = new SinhaPage(i, this);
+			this.pagetable.add(newpage);
+		}
+		
+		this.currentpagenum = this.word / this.size_of_page; 
+		this.currentpage = this.pagetable.get(currentpagenum); 
+		//nextWordToRef(scan); */
 	}
+	
 	
 	/*
 	 * returns process ID
@@ -128,14 +134,15 @@ public class SinhaProcess
 	 * calculates the next word to reference according to algorithm provided by the spec
 	 * sets the next page number and the next page as well
 	 */
-	public void nextWordToRef(Scanner scan1) throws FileNotFoundException
+	public void nextWordToRef(Scanner scan1, int rand) throws FileNotFoundException
 	{
 		//File f = new File("random-numbers.txt");
 		//Scanner scan1 = new Scanner(f);
 		//String rstr = scan1.next();
 		//System.out.println(rstr);
-		int r = scan1.nextInt();
-		y = r / (Integer.MAX_VALUE + 1d);
+		//this.r = scan1.nextInt();
+		//System.out.println(r);
+		y = rand / (Integer.MAX_VALUE + 1d);
 		if (y < this.A)
 		{
 			this.word = (this.word + 1 + this.size) % this.size;
@@ -155,6 +162,6 @@ public class SinhaProcess
 		}
 		
 		this.currentpagenum = this.word / this.size_of_page;
-		this.currentpage = this.pagetable.get(currentpagenum);
+		this.currentpage = this.pagetable.get(this.currentpagenum);
 	}
 }
