@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.Stack;
@@ -66,16 +67,22 @@ public class SinhaFrameTable
 	
 	/*
 	 * LRU replacement algorithm
-	 * this method removes the first page in the list, which references the least recently used
+	 * this method sorts the pages currently in the frame table by their last reference variable
 	 * non evicted pages are not members of this list
-	 * returns the frame of the page
+	 * returns the frame of the page with the lowest last reference 
 	 */
-	public int lru_replace()
+	public int lru_replace(SinhaProcess c)
 	{
-		SinhaPage p = pagerefs.get(0);
-		int answer = p.getFrameFromPage();
-		pagerefs.remove(pagerefs.get(0));
-		return answer;
+		
+		ArrayList<SinhaPage> temp = new ArrayList<SinhaPage>(); //copy the elements into a temporary arraylist
+		for (int i : hash.keySet())
+		{
+			temp.add(hash.get(i));
+		}
+		
+		Collections.sort(temp); //sort the elements by their last reference variable 
+		return temp.get(0).getFrameFromPage(); //first element in sorted list is the least recently used 
+	
 	}
 	
 	/*

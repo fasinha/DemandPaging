@@ -23,6 +23,8 @@ public class SinhaProcess
 	int r; 
 	int size_of_page; //size of the pages
 	
+	ArrayList<SinhaPage> lrulist; 
+	
 	ArrayList<SinhaPage> pagetable; //list of all the pages for this process 
 	private double y; //used in the method for determining the next reference
 	
@@ -48,7 +50,7 @@ public class SinhaProcess
 		this.referencenum = referencenum;
 		this.size_of_page = size_of_page;
 		
-		
+		this.lrulist = new ArrayList<SinhaPage>();
 		
 		this.word = (111*id + this.size) % this.size;
 		this.residence =0;

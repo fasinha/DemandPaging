@@ -168,7 +168,7 @@ public class SinhaPaging
 			{
 				current = temp.get(i); // get the current process
 				
-				
+				//frametable.pagerefs.add(current.currentpage);
 				// this process's round robin time starts
 				for (int ref = 0; ref < quantum; ref++) 
 				{
@@ -178,33 +178,38 @@ public class SinhaPaging
 					if (current.referencechanging > 0) 
 					{
 						
+						current.currentpage.lastref = currentcycle;
+						
 						//current.referencechanging--;
 						
 						//frametable.setLargestFreeFrame();
 						if (current.currentpage.getFrameFromPage() == -1) // if we have a page fault
 						{
-							//frametable.pagerefs.add(current.currentpage);
-							//frametable.pagerefs.add(current.currentpage);
+							
 							//System.out.println("current page is " + current.currentpage);
 							current.isFault = true;
 							current.faults++; // increment fault
 							frametable.setLargestFreeFrame();
-							//frametable.pagerefs.add(current.currentpage);
+							
 							if (frametable.getLargestFreeFrame() != -1) // if there is still a free frame
 							{
 								System.out.println("Free frame: " + frametable.getLargestFreeFrame());
 								int frametoload = frametable.getLargestFreeFrame();
 								frametable.ft[frametoload] = current.currentpage;
+								
 								System.out.println("using free frame " + frametable.getLargestFreeFrame());
-								frametable.hash.put(frametoload, current.currentpage); //JUST ADDED 
+								
 								
 								frametable.stack.add(current.currentpage); //add the page to the stack. used for LIFO algorithm.
-								frametable.pagerefs.add(current.currentpage); //add the page to the list used for LRU algorithm
+								//frametable.pagerefs.add(current.currentpage); //add the page to the list used for LRU algorithm
+								current.lrulist.add(current.currentpage);
 								
 								current.currentpage.setFrame(frametoload);
 								frametable.setLargestFreeFrame();
+								//System.out.println("Largets free frame is now: " + frametable.getLargestFreeFrame());
 								current.currentpage.start = currentcycle; 
 								
+								frametable.hash.put(frametoload, current.currentpage); //JUST ADDED 
 								//frametable.largestfreeframe =-1;
 								 
 							} else 
@@ -214,7 +219,7 @@ public class SinhaPaging
 								if (algo.equals("lru")) 
 								{
 									
-									int evictindex = frametable.lru_replace();
+									int evictindex = frametable.lru_replace(current);
 									System.out.println("evicting frame  " + evictindex);
 									if (frametable.hash.get(evictindex) != null)
 									{
@@ -224,9 +229,14 @@ public class SinhaPaging
 										toevict.evict = currentcycle; //set the evict time to this cycle
 										toevict.pageresidence = toevict.evict - toevict.start; //calculate this page's residence time
 										toevict.runningsum += toevict.pageresidence;
-										frametable.stack.add(current.currentpage); //add the process's current page to the stack for LIFO
-										frametable.pagerefs.add(current.currentpage); //add the process's current page to the list for LRU
 										toevict.setFrame(-1); //set the evicted page's frame to -1 because it is evicted
+										
+										frametable.stack.add(current.currentpage); //add the process's current page to the stack for LIFO
+										//frametable.pagerefs.add(toevict);
+										
+									
+										//frametable.pagerefs.add(current.currentpage); //add the process's current page to the list for LRU
+										
 										frametable.ft[evictindex] = current.currentpage; //place the current page into the now empty page frame
 										
 										

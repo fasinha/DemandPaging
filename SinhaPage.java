@@ -1,5 +1,5 @@
 
-public class SinhaPage 
+public class SinhaPage implements Comparable<SinhaPage>
 {
 	private int num; //page number
 	private int frame; //frame the page is currently in
@@ -28,12 +28,6 @@ public class SinhaPage
 		runningsum = 0;
 	}
 	
-	/*
-	public void setFrame(SinhaFrame f)
-	{
-		this.frame= f;
-	} */
-	
 	
 	/*
 	 * places the page into a frame
@@ -57,6 +51,12 @@ public class SinhaPage
 	public int getFrameFromPage()
 	{
 		return this.frame;
+	}
+
+
+	@Override
+	public int compareTo(SinhaPage comparepage) {
+		return this.lastref - comparepage.lastref;
 	}
 	
 }
